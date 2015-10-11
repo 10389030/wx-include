@@ -7,6 +7,7 @@ import (
 	"crypto/sha1"
 	"log"
 	"fmt"
+	"encoding/hex"
 )
 
 func CheckServer(w http.ResponseWriter, r *http.Request) {
@@ -21,11 +22,12 @@ func CheckServer(w http.ResponseWriter, r *http.Request) {
 	sort.Strings(fileds)
 	var txt = strings.Join(fileds, "")
 	var sha1Rst = sha1.Sum([]byte(txt))
+	var hexRst = hex.EncodeToString(sha1Rst[:])
 
-	log.Printf("cal sha1: % x", sha1Rst)
-	log.Printf("req sha1: % x", signature)
+	log.Printf("cal sha1: %s", hexRst)
+	log.Printf("req sha1: %s", signature)
 
-	if string(sha1Rst[:]) == signature {
+	if hexRst == signature {
 		// check ok
 		log.Print("check sucess!")
 		fmt.Fprint(w, echostr)	
