@@ -22,8 +22,8 @@ func CheckServer(w http.ResponseWriter, r *http.Request) {
 	var txt = strings.Join(fileds, "")
 	var sha1Rst = sha1.Sum([]byte(txt))
 
-	log.Print("cal sha1: % x", sha1Rst)
-	log.Print("req sha1: % x", signature)
+	log.Printf("cal sha1: % x", sha1Rst)
+	log.Printf("req sha1: % x", signature)
 
 	if string(sha1Rst[:]) == signature {
 		// check ok
@@ -31,7 +31,7 @@ func CheckServer(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, echostr)	
 	} else {
 		// check error
-		log.Print("check error: token=%s.", API_TOKEN)
+		log.Printf("check error: token=%s.", API_TOKEN)
 		fmt.Fprint(w, "check error")
 	}
 }

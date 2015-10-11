@@ -6,5 +6,5 @@ import (
 
 var Handler = tool.NewServeMuxEx()
 func init() {
-	Handler.HandleFunc("check_svr", CheckServer)
+	Handler.HandleFunc("/check_svr", CheckServer)
 }

@@ -2,12 +2,12 @@ package main
 
 import (
 	"tool"
-	"auth"
+	"api"
 )
 
 var Handler = tool.NewServeMuxEx()
 
 func init() {
-	Handler.Handle("/auth/", auth.Handler)
+	Handler.Handle("/api/", api.Handler)
 }
 

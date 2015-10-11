@@ -2,6 +2,7 @@ package tool
 
 import (
 	"net/http"
+	"log"
 )
 
 // Extern net/http.ServeMux to add subtree rooting.
@@ -23,6 +24,7 @@ func (mux *ServeMuxEx) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h, pattern := mux.Handler(r)
+	log.Printf("pattern: %s, url=%s", pattern, r.URL.Path)
 	var patternLen = len(pattern)
 	if patternLen > 0 && pattern[patternLen - 1] == '/' { 
 		r.URL.Path = r.URL.Path[len(pattern) - 1:]
