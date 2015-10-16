@@ -1,11 +1,10 @@
 package main
 
 import (
-	"tool"
 	"api"
 )
 
-var Handler = tool.NewServeMuxEx()
+var Handler = api.NewServeMuxEx()
 
 func init() {
 	Handler.Handle("/api/", api.Handler)

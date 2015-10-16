@@ -8,6 +8,8 @@ import (
 	"log"
 	"fmt"
 	"encoding/hex"
+	"encoding/xml"
+	"time"
 )
 
 func CheckServer(w http.ResponseWriter, r *http.Request) {
@@ -36,4 +38,20 @@ func CheckServer(w http.ResponseWriter, r *http.Request) {
 		log.Printf("check error: token=%s.", API_TOKEN)
 		fmt.Fprint(w, "check error")
 	}
+}
+
+func EventSubsribe(w http.ResponseWriter, msg *Message) {
+	result := &TextMessage{
+		MessageBase: MessageBase {
+			ToUserName: msg.FromUserName,
+			FromUserName: msg.ToUserName,
+			CreateTime: time.Now().Unix(),
+			MsgType: "text",
+		},
+		Content: "Hi! My Tel: 17097228030",
+	}
+
+	bytes, _ := xml.Marshal(result)
+	log.Print(string(bytes))
+	fmt.Fprint(w, bytes)
 }

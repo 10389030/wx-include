@@ -1,10 +1,6 @@
 package api
 
-import (
-	"tool"
-)
-
-var Handler = tool.NewServeMuxEx()
+var Handler = NewServeMuxEx()
 func init() {
-	Handler.HandleFunc("/check_svr", CheckServer)
+	Handler.HandleMsg(&MsgRouteInfo{MsgType: "event", Event: "subscribe"}, EventSubsribe)
 }
