@@ -73,7 +73,7 @@ func _wrap(content string) (f func(http.ResponseWriter, *Message)) {
 func EventSubsribe(w http.ResponseWriter, msg *Message) {
 	log.Printf("msg: %#v", msg)
 
-	ReplyText(w, msg, "朋来,乐哉!\n现在满足你一个愿望，大胆说出来吧... (限本人力所能及) \n例如: wish 大帅哥/萌妹子一个")
+	ReplyText(w, msg, "欢迎成为本人订阅号第一批用户!\n现在满足你一个愿望，大胆说出来吧... (限本人力所能及) \n例如: wish 大帅哥/萌妹子一个")
 }
 
 func AutoReplyText(w http.ResponseWriter, msg *Message) {
@@ -128,7 +128,11 @@ func AutoReplyText(w http.ResponseWriter, msg *Message) {
 	cmds["cmd"].Handler = _wrap(commands_txt)
 
 	// do routing
-	cmd := strings.ToLower(msg.Content)
+	fields := strings.Fields(msg.Content)
+	cmd := ""
+	if len(fields) > 0 {
+		cmd = strings.ToLower(fields[0])
+	}
 	if command, ok := cmds[cmd]; ok {
 		command.Handler(w, msg);
 	} else {
