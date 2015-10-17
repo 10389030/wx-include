@@ -41,6 +41,8 @@ func CheckServer(w http.ResponseWriter, r *http.Request) {
 }
 
 func EventSubsribe(w http.ResponseWriter, msg *Message) {
+	log.Printf("msg: %#v", msg)
+
 	result := &TextMessage{
 		MessageBase: MessageBase {
 			ToUserName: msg.FromUserName,
@@ -48,10 +50,55 @@ func EventSubsribe(w http.ResponseWriter, msg *Message) {
 			CreateTime: time.Now().Unix(),
 			MsgType: "text",
 		},
-		Content: "Hi! My Tel: 17097228030",
+		Content: `<!CDATA[
+			Hi, 欢迎关注我的订阅号！来，机会只有一次，大声说出你的愿望吧...
+		]]`,
 	}
 
 	bytes, _ := xml.Marshal(result)
 	log.Print(string(bytes))
-	fmt.Fprint(w, bytes)
+	fmt.Fprint(w, string(bytes))
+}
+
+
+func AutoReplyText(w http.ResponseWriter, msg *Message) {
+	log.Print("msg: %#v", msg)
+
+	result := &TextMessage{
+		MessageBase: MessageBase {
+			ToUserName: msg.FromUserName,
+			FromUserName: msg.ToUserName,
+			CreateTime: time.Now().Unix(),
+			MsgType: "text",
+		},
+		Content: "",
+	}
+
+	var content = ""
+	switch msg.Content {
+		case "cmd":
+			content = `
+				cmd   : 获得所有指令 
+				About : 订阅号信息
+			`
+		case "About":
+			content = `
+				ID       : gh_95b6702312f1
+			    Author   : 许俊伟(Junzexu);
+				Version  : v0.0.1_1;
+				CreateAt : 2015-10-17;
+				Mail     : xu_jun_wei@126.com;
+			`
+		default:
+			content = `
+				Sorry! unrecognize command.
+				Try 'cmd' for all command.
+			`
+	}
+
+	result.Content = "<!CDATA[" + content + "]]"
+
+	log.Print("replay: %#v", result)
+	bytes, _ := xml.Marshal(result)
+	fmt.Fprint(w, string(bytes))
 }
