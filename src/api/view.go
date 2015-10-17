@@ -50,7 +50,7 @@ func ReplyText(w http.ResponseWriter, msg *Message, content string) {
 		},
 	}
 
-	str_slice := strings.Split(content, "\n")
+	str_slice := strings.Split(strings.TrimSpace(content), "\n")
 	for idx, str := range str_slice {
 		str_slice[idx] = strings.TrimSpace(str)
 	}
@@ -73,7 +73,7 @@ func _wrap(content string) (f func(http.ResponseWriter, *Message)) {
 func EventSubsribe(w http.ResponseWriter, msg *Message) {
 	log.Printf("msg: %#v", msg)
 
-	ReplyText(w, msg, "朋来,乐哉!\n即课满足你一个愿望，大胆说出来吧... (限本人力所能及) \n例如: wish 大帅哥/萌妹子一个")
+	ReplyText(w, msg, "朋来,乐哉!\n现在满足你一个愿望，大胆说出来吧... (限本人力所能及) \n例如: wish 大帅哥/萌妹子一个")
 }
 
 func AutoReplyText(w http.ResponseWriter, msg *Message) {
@@ -103,12 +103,6 @@ func AutoReplyText(w http.ResponseWriter, msg *Message) {
 		},
 	}
 
-	cmd := strings.ToLower(msg.Content)
-	if command, ok := cmds[cmd]; ok {
-		command.Handler(w, msg);
-	} else {
-		cmds["cmd"].Handler(w, msg)
-	}
 
 
 	// attention: following code should alway put at the end
@@ -132,4 +126,12 @@ func AutoReplyText(w http.ResponseWriter, msg *Message) {
 
 	commands_txt := strings.Join(segs, "\n")
 	cmds["cmd"].Handler = _wrap(commands_txt)
+
+	// do routing
+	cmd := strings.ToLower(msg.Content)
+	if command, ok := cmds[cmd]; ok {
+		command.Handler(w, msg);
+	} else {
+		cmds["cmd"].Handler(w, msg)
+	}
 }
