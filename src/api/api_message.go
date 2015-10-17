@@ -6,8 +6,8 @@ import (
 
 // 消息类型
 const (
-	EV_EVENT 			string = "event"              // 消息推送
-	EV_TEXT 			string = "text"               // 用户文本消息
+	EV_EVENT 		   string = "event"              // 消息推送
+	EV_TEXT 		   string = "text"               // 用户文本消息
 	EV_IMAGE           string = "image"              // 用户图片消息
 	EV_VOICE           string = "voice"              // 用户语音消息    
 	EV_VIDEO           string = "video"              // 用户视频消息
@@ -18,9 +18,9 @@ const (
 
 // 操作类型
 const (
-	OP_SUBSCRIBE 		string = "subscribe"
-	OP_UNSUBSCRIBE 	string = "unsubscribe"
-	OP_SCAN 			string = "SCAN"                 // 重复扫二维码关注
+	OP_SUBSCRIBE 	   string = "subscribe"
+	OP_UNSUBSCRIBE 	   string = "unsubscribe"
+	OP_SCAN 		   string = "SCAN"                 // 重复扫二维码关注
 	OP_LOCATION        string = "LOCATION"             // 上报地理位置
 	OP_CLICK           string = "CLICK"                // 自定义菜单点击事件
 )
@@ -67,6 +67,10 @@ type Article struct {
 	Url             string
 }
 
+type MessageRoute struct {
+	MsgType         string
+	Event           string
+}
 
 type Message struct {
 	XMLName 		xml.Name 	`xml:"xml" json:-`
@@ -74,10 +78,7 @@ type Message struct {
 	FromUserName 	string
 	CreateTime 		int
 
-	// 消息类型
-	MsgType 		string
-	// 事件类型 
-	Event           string    
+	MessageRoute      // 路由的关键信息
 
 	// 带参数二维码扫描
 	// 1 用户从未关注=>关注: qrscene_<parameter>

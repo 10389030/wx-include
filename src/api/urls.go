@@ -1,6 +1,7 @@
 package api
 
-var Handler = NewServeMuxEx()
+var Handler = NewMessageRouter()
+
 func init() {
-	Handler.HandleMsg(&MsgRouteInfo{MsgType: "event", Event: "subscribe"}, EventSubsribe)
+	Handler.HandleMsg(&MessageRoute{MsgType: "event", Event: "subscribe"}, EventSubsribe)
 }
