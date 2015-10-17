@@ -40,65 +40,96 @@ func CheckServer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func EventSubsribe(w http.ResponseWriter, msg *Message) {
-	log.Printf("msg: %#v", msg)
-
-	result := &TextMessage{
+func ReplyText(w http.ResponseWriter, msg *Message, content string) {
+	result := &TextMessage {
 		MessageBase: MessageBase {
 			ToUserName: msg.FromUserName,
 			FromUserName: msg.ToUserName,
 			CreateTime: time.Now().Unix(),
 			MsgType: "text",
 		},
-		Content: `<!CDATA[
-			Hi, 欢迎关注我的订阅号！来，机会只有一次，大声说出你的愿望吧...
-		]]`,
 	}
 
-	bytes, _ := xml.Marshal(result)
-	log.Print(string(bytes))
-	fmt.Fprint(w, string(bytes))
+	str_slice := strings.Split(content, "\n")
+	for idx, str := range str_slice {
+		str_slice[idx] = strings.TrimSpace(str)
+	}
+	result.Content = strings.Join(str_slice, "\n")
+
+	data, _ := xml.Marshal(result)
+	fmt.Fprint(w, string(data))
+
+	log.Printf("return: %s", string(data))
+}
+
+// toolkit: return a handler witch return specified text
+func _wrap(content string) (f func(http.ResponseWriter, *Message)) {
+	return func(w http.ResponseWriter, msg *Message) {
+		ReplyText(w, msg, content)
+	}
 }
 
 
+func EventSubsribe(w http.ResponseWriter, msg *Message) {
+	log.Printf("msg: %#v", msg)
+
+	ReplyText(w, msg, "朋来,乐哉!\n即课满足你一个愿望，大胆说出来吧... (限本人力所能及) \n例如: wish 大帅哥/萌妹子一个")
+}
+
 func AutoReplyText(w http.ResponseWriter, msg *Message) {
+
 	log.Print("msg: %#v", msg)
 
-	result := &TextMessage{
-		MessageBase: MessageBase {
-			ToUserName: msg.FromUserName,
-			FromUserName: msg.ToUserName,
-			CreateTime: time.Now().Unix(),
-			MsgType: "text",
+	type Command struct {
+		Note string	
+		Handler func(w http.ResponseWriter, msg *Message)
+	}
+
+	// cmd must be lower
+	// : please register cmd into cmds
+	cmds := map[string] *Command {
+		"about": &Command{
+			Note: "本订阅号基本信息",
+			Handler: _wrap(`
+				Author   : Junzexu
+				Version  : V0.0.1_1 
+				Mail     : xu_jun_wei@126.com
+				Power By : WXSVR / AWS / GoLang
+			`),
 		},
-		Content: "",
+		"wish": &Command{
+			Note: "我是阿拉神灯",
+			Handler: _wrap("骗你的啦！\n听老板说好好工作，想要的都会有的，哈哈哈..."),
+		},
 	}
 
-	var content = ""
-	switch msg.Content {
-		case "cmd":
-			content = `
-				cmd   : 获得所有指令 
-				About : 订阅号信息
-			`
-		case "About":
-			content = `
-				ID       : gh_95b6702312f1
-			    Author   : 许俊伟(Junzexu);
-				Version  : v0.0.1_1;
-				CreateAt : 2015-10-17;
-				Mail     : xu_jun_wei@126.com;
-			`
-		default:
-			content = `
-				Sorry! unrecognize command.
-				Try 'cmd' for all command.
-			`
+	cmd := strings.ToLower(msg.Content)
+	if command, ok := cmds[cmd]; ok {
+		command.Handler(w, msg);
+	} else {
+		cmds["cmd"].Handler(w, msg)
 	}
 
-	result.Content = "<!CDATA[" + content + "]]"
 
-	log.Print("replay: %#v", result)
-	bytes, _ := xml.Marshal(result)
-	fmt.Fprint(w, string(bytes))
+	// attention: following code should alway put at the end
+	cmds["cmd"] = &Command {
+		Note: "列出所有的指令",
+		Handler: nil,
+	}
+
+	max_length := 0
+	for k, _ := range cmds {
+		chars_len := len([]rune(k))
+		if max_length < chars_len {
+			max_length = chars_len
+		}
+	}
+
+	segs := []string{}
+	for k, v := range cmds {
+		segs = append(segs, k + ": \t" + v.Note)
+	}
+
+	commands_txt := strings.Join(segs, "\n")
+	cmds["cmd"].Handler = _wrap(commands_txt)
 }
