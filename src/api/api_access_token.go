@@ -1,11 +1,11 @@
 package api
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
-	"encoding/json"
-	"log"
-	"io/ioutil"
 )
 
 type AccessTokenRsp struct {
@@ -21,11 +21,11 @@ func GetAccessTokenReq() (*http.Request, error) {
 	vals.Set("appid", API_APPID)
 	vals.Set("secret", API_SECRET)
 
-	var url = API_HOST + "/cgi-bin/token?" + vals.Encode() 
+	var url = API_HOST + "/cgi-bin/token?" + vals.Encode()
 	return http.NewRequest("GET", url, nil)
 }
 
-func GetAccessToken() (*AccessTokenRsp){
+func GetAccessToken() *AccessTokenRsp {
 	var cli = &http.Client{}
 	var req, _ = GetAccessTokenReq()
 
@@ -33,7 +33,7 @@ func GetAccessToken() (*AccessTokenRsp){
 	if rsp != nil {
 		defer rsp.Body.Close()
 	}
-	
+
 	if err != nil {
 		log.Panic("GetAccessTokenReq err: %d", err)
 	}
@@ -41,7 +41,7 @@ func GetAccessToken() (*AccessTokenRsp){
 	var rsp_st = &AccessTokenRsp{ErrCode: 200}
 	var data, _ = ioutil.ReadAll(rsp.Body)
 	json.Unmarshal(data, rsp_st)
-	
+
 	if rsp_st.ErrCode != 200 {
 		log.Printf("GetAccessTokenRsp: %#v", rsp_st)
 	}

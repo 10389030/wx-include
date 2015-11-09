@@ -10,4 +10,3 @@ var Handler = http.NewServeMux()
 func init() {
 	Handler.Handle("/api/", api.Handler)
 }
-

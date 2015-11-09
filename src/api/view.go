@@ -1,24 +1,24 @@
 package api
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
+	"encoding/xml"
+	"fmt"
+	"log"
 	"net/http"
 	"sort"
 	"strings"
-	"crypto/sha1"
-	"log"
-	"fmt"
-	"encoding/hex"
-	"encoding/xml"
 	"time"
 )
 
 func CheckServer(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm() // update r.Form  net/url.Values
-	
+
 	var signature = r.Form.Get("signature")
 	var timestamp = r.Form.Get("timestamp")
-	var nonce     = r.Form.Get("nonce")
-	var echostr   = r.Form.Get("echostr")
+	var nonce = r.Form.Get("nonce")
+	var echostr = r.Form.Get("echostr")
 
 	var fileds = []string{API_TOKEN, timestamp, nonce}
 	sort.Strings(fileds)
@@ -32,7 +32,7 @@ func CheckServer(w http.ResponseWriter, r *http.Request) {
 	if hexRst == signature {
 		// check ok
 		log.Print("check sucess!")
-		fmt.Fprint(w, echostr)	
+		fmt.Fprint(w, echostr)
 	} else {
 		// check error
 		log.Printf("check error: token=%s.", API_TOKEN)
@@ -41,12 +41,12 @@ func CheckServer(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReplyText(w http.ResponseWriter, msg *Message, content string) {
-	result := &TextMessage {
-		MessageBase: MessageBase {
-			ToUserName: msg.FromUserName,
+	result := &TextMessage{
+		MessageBase: MessageBase{
+			ToUserName:   msg.FromUserName,
 			FromUserName: msg.ToUserName,
-			CreateTime: time.Now().Unix(),
-			MsgType: "text",
+			CreateTime:   time.Now().Unix(),
+			MsgType:      "text",
 		},
 	}
 
@@ -69,7 +69,6 @@ func _wrap(content string) (f func(http.ResponseWriter, *Message)) {
 	}
 }
 
-
 func EventSubsribe(w http.ResponseWriter, msg *Message) {
 	log.Printf("msg: %#v", msg)
 
@@ -81,13 +80,13 @@ func AutoReplyText(w http.ResponseWriter, msg *Message) {
 	log.Print("msg: %#v", msg)
 
 	type Command struct {
-		Note string	
+		Note    string
 		Handler func(w http.ResponseWriter, msg *Message)
 	}
 
 	// cmd must be lower
 	// : please register cmd into cmds
-	cmds := map[string] *Command {
+	cmds := map[string]*Command{
 		"about": &Command{
 			Note: "本订阅号基本信息",
 			Handler: _wrap(`
@@ -98,16 +97,14 @@ func AutoReplyText(w http.ResponseWriter, msg *Message) {
 			`),
 		},
 		"wish": &Command{
-			Note: "我是阿拉神灯",
+			Note:    "我是阿拉神灯",
 			Handler: _wrap("骗你的啦！\n听老板说好好工作，想要的都会有的，哈哈哈..."),
 		},
 	}
 
-
-
 	// attention: following code should alway put at the end
-	cmds["cmd"] = &Command {
-		Note: "列出所有的指令",
+	cmds["cmd"] = &Command{
+		Note:    "列出所有的指令",
 		Handler: nil,
 	}
 
@@ -121,7 +118,7 @@ func AutoReplyText(w http.ResponseWriter, msg *Message) {
 
 	segs := []string{}
 	for k, v := range cmds {
-		segs = append(segs, k + ": \t" + v.Note)
+		segs = append(segs, k+": \t"+v.Note)
 	}
 
 	commands_txt := strings.Join(segs, "\n")
@@ -134,7 +131,7 @@ func AutoReplyText(w http.ResponseWriter, msg *Message) {
 		cmd = strings.ToLower(fields[0])
 	}
 	if command, ok := cmds[cmd]; ok {
-		command.Handler(w, msg);
+		command.Handler(w, msg)
 	} else {
 		cmds["cmd"].Handler(w, msg)
 	}

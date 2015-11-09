@@ -1,14 +1,14 @@
 package main
 
 import (
-	"net/http"
-	"log"
 	"api"
+	"log"
+	"net/http"
 )
 
 func main() {
 	var svr = &http.Server{
-		Addr: ":http",
+		Addr:    ":http",
 		Handler: Handler,
 	}
 
